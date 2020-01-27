@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<?php
+//-- Fonction de récupération de l'adresse IP du visiteur
+    if ( isset ( $_SERVER['HTTP_X_FORWARDED_FOR'] ) )
+    {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    elseif ( isset ( $_SERVER['HTTP_CLIENT_IP'] ) )
+    {
+        $ip  = $_SERVER['HTTP_CLIENT_IP'];
+    }
+    else
+    {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    $ipe = base64_encode(base64_encode($ip));
+?>
+<!-- double decode base64 -->
+    <title><?php echo "DAYCTF 2020-02-05 - DUT Réseaux & Télécom / Lycées - " . $ipe ?></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://bulma.io/css/bulma-docs.min.css?v=201911141434">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <link rel="stylesheet" href="/style.css">
+    <script defer src="lycees_details.js"></script>
+</head>
+
+<body>
+
+<body bgcolor='black'>
+
+<div class="column auto">
+<figure width="100%" style="text-align:center">
+                    <img src="/img/dayctf_20200205.png">
+		</figure>
+</div>
+<div class="presentation">
+<font color="white">
+<h2 class="subtitle">
+<font color="red">
+Le formulaire d'inscription est bientôt disponible.</br></br>
+<font color="white">
+Vous êtes lycéens (de la seconde à la terminale), vous avez envie de découvrir la CyberSécurité alors participez au CTF (Capture The Flag) national organisé par les DUT Réseaux & Télécoms.</br></br>
+
+Pour participer, tu dois trouver dans ton lycée un.e équipier.ère pour constituer une équipe.</br>
+Vous allez vous inscrire ensemble avec le formulaire bientôt en ligne.</br>
+Pour que l'inscription soit validée, vous devez avoir chacun une adresse email valide.</br>
+Vous compléterez le formulaire avec votre département, la ville, votre lycée et le Département Réseaux & Télécoms de l'IUT qui vous accueille.</br></br>
+
+Une fois le formulaire envoyé, vous recevrez chacun un mail avec un lien de confirmation.</br>
+Seulement quand les 2 membres de l'équipe ont confirmé le lien alors l'inscription sera validée ... mais il faudra aussi trouver des Flags dans cette page ... </br></br>
+
+Le challenge commencera nationalement à 14H, et vous aurez 1H30 pour trouvez le maximum de Flags.</br>
+Vous serez accompagnés par des étudiants en DUT Réseaux & Télécoms, vous pourrez échanger avec eux sur la formation, les métiers, les stages, l'alternance ... autour des Réseaux & Télécommunications et des métiers d'avenir en CyberSécurité, Internet des Objets, Hauts-Débits, ....</br>
+
+</h2>
+
+
+</div>
+
+
+</body>
+
+</html>

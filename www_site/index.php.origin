@@ -2,25 +2,8 @@
 <html lang="fr">
 
 <head>
-<?php
-//-- Fonction de récupération de l'adresse IP du visiteur
-    if ( isset ( $_SERVER['HTTP_X_FORWARDED_FOR'] ) )
-    {
-        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    }
-    elseif ( isset ( $_SERVER['HTTP_CLIENT_IP'] ) )
-    {
-        $ip  = $_SERVER['HTTP_CLIENT_IP'];
-    }
-    else
-    {
-        $ip = $_SERVER['REMOTE_ADDR'];
-    }
-    $ipe = base64_encode(base64_encode("Flag_" . $ip));
-?>
-<!-- double decode base64 -->
-    <title><?php echo "DAYCTF 2020-02-05 - DUT Réseaux & Télécom / Lycées - " . $ipe ?></title>    
-    <meta charset="utf-8">	
+    <title>IUT Réseaux & Télécom - CTF 2020</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="https://bulma.io/css/bulma-docs.min.css?v=201911141434">
@@ -43,7 +26,8 @@
         var title = item[0] + " " + item[1];
 
         if (value == title) {
-          document.getElementById("lycee").innerHTML += "<option>" + item[2] + "</option><br>";
+
+          document.getElementById("lycee").innerHTML += "<option>" + item + "</option><br>";
         }
 
       }
@@ -99,28 +83,7 @@
     require_once('lycees.php');
     ?>
 
-<section class="section">
-    <div class="container">
-      <h1 class="title"></h1>
-      <h2 class="subtitle">
-        <strong>Etape 1 :</strong>Remplissez ce formulaire pour votre équipe, qui doit être composée de deux participants du même lycée.
-      </h2>
-      <h2 class="subtitle">
-        <strong>Etape 2 :</strong>Validez vos emails en cliquant sur le lien reçu dans les mails. Les deux emails ont des codes différents.
-      </h2>
-      <h2 class="subtitle">
-        <strong>Etape 3 :</strong>Une fois les deux mails validés, vous recevrez un email de confirmation avec le nom de votre Team.
-      </h2>
-      <h2 class="subtitle">
-        <strong>Etape 4 :</strong>Vous pouvez chercher les flags, de la forme Flag_6b903f4c10a2813fea1fd6f5d3431fb6, qui sont cachés sur ce site web, et les soumettre pour commencer à marquer des points.
-      </h2>
-      <h2 class="subtitle">
-        <strong>Etape 5 :</strong>Rendez-vous le 5 février dans l'IUT de votre choix.
-      </h2>
-    </div>
 
-
-  </section>
 
     <section class="section">
 
@@ -143,7 +106,7 @@
       </div>
 
       <div class="field">
-        <label class="label">Lycée</label>
+        <label class="label">Lycées</label>
         <div class="control">
           <div class="select">
             <select name="lycee" id="lycee">
