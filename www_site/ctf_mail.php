@@ -24,7 +24,7 @@ function getHTML($title, $content) {
 
 function ctf_send_registered_mail($uid, $uidmail, $to) {
     //echo "Send mail to ".$to;
-    $url = "https://".$_SERVER['HTTP_HOST']."/register.php?uid=".$uid."&uidm=".$uidmail;
+    $url = "https://dayctf.iut-rt.net/register.php?uid=".$uid."&uidm=".$uidmail;
     
     $subject = "[Day CTF RT] Confirmation d'enregistrement";
     $title = htmlentities("[Day CTF RT] Confirmation d'enregistrement");
@@ -40,7 +40,7 @@ function ctf_send_registered_mail($uid, $uidmail, $to) {
 
 function ctf_send_team_validated_mail($uid, $uidmail, $to, $teamname) {
     //echo "Send mail to ".$to;
-    $url = "https://".$_SERVER['HTTP_HOST']."/register.php?uid=".$uid."&uidm=".$uidmail;
+    $url = "https://dayctf.iut-rt.net/register.php?uid=".$uid."&uidm=".$uidmail;
     
     $subject = "[Day CTF RT] Confirmation de la Team";
     $title = htmlentities("[Day CTF RT] Team validé");
@@ -53,5 +53,22 @@ function ctf_send_team_validated_mail($uid, $uidmail, $to, $teamname) {
     return ctf_send_gmail($to, $subject, $htmlbody, "");
 }
 
+
+function ctf_send_team_validated_mail_waitinglist($uid, $uidmail, $to, $teamname) {
+    //echo "Send mail to ".$to;
+    $url = "https://dayctf.iut-rt.net/register.php?uid=".$uid."&uidm=".$uidmail;
+    
+    $subject = "[Day CTF RT] Confirmation de la Team en liste d attente";
+    $title = htmlentities("[Day CTF RT] Team validé");
+    $content =htmlentities("Vos deux emails sont validés.")."</br>"
+    .htmlentities("Le nom de votre team est : ").$teamname.". </br>"
+    .htmlentities("Nous sommes désolés, mais toutes les places pour le CTF de cet établissement ont été attribuées. 
+    Vous êtes sur la liste d'attente. Nous vous contacterons rapidement par mail pour vous informer de la suite donnée à votre candidature.</br>")
+    .htmlentities("Vous pouvez commencer à chercher des Flags en cliquant sur le lien: ")."<a href='{{URL}}'>{{URL}}";
+    $htmlbody = getHTML($title, $content); 
+    $htmlbody = str_replace("{{URL}}", $url, $htmlbody);
+  
+    return ctf_send_gmail($to, $subject, $htmlbody, "");
+}
 
 ?>

@@ -4,9 +4,9 @@
             <div class="columns">
                 
                 <div class="column is-two-thirds has-text-centered">
-                    <h1 class="title">
+                    <h2 class="title">
 <?php echo $msg; ?>
-                    </h1>
+                    </h2>
                 </div>
 
             </div>

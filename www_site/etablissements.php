@@ -1,5 +1,39 @@
 <?php
 
+
+    $etablissements_places= [ 
+        "Annecy" => 0,
+        "Auxerre" => 25 ,
+        "Bethune" => 20 ,
+        "Beziers" => 20 ,
+        "Blagnac" => 25 ,
+        "Blois" => 0 ,
+        "Caen-Ifs" => 20 ,
+        "Chalons-en-Champagne" => 20 ,
+        "Clermont-Ferrand" => 20 ,
+        "Colmar" => 0 ,
+        "Grenoble" => 0 ,
+        "Kourou" => 0 ,
+        "La Reunion" => 20 ,
+        "La Roche sur Yon" => 0 ,
+        "La Rochelle" => 20 ,
+        "Lannion" => 20 ,
+        "Luminy" => 0 ,
+        "Mont de Marsan" => 18 ,
+        "Montbeliard" => 0 ,
+        "Nancy" => 20 ,
+        "Poitiers" => 0 ,
+        "Roanne" => 0 ,
+        "Rouen-Elbeuf" => 0 ,
+        "Saint-Malo" => 0 ,
+        "Sophia" => 0 ,
+        "Valence" => 0 ,
+        "Velizy" => 0 ,
+        "Villetaneuse" => 20 ,
+        "Vitry" => 0 ,
+    ];
+
+
     $etablissements= array (
         "",
         "Annecy",
@@ -32,6 +66,7 @@
         "Villetaneuse",
         "Vitry",
     );
+
     $etablissements_full= array (
         "",
         "01 - Annecy",

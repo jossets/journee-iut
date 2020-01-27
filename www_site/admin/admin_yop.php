@@ -33,7 +33,6 @@
 </div>
 
     <?php require_once('../header.php'); 
-		require_once('../etablissements.php'); 
 /*    
         if (isset($_GET['dropuid'])) {
             $uid = $_GET['dropuid'];
@@ -133,20 +132,20 @@
                     $current_lycee="";
                     $count=0;
                     while ($row = $results->fetchArray()) {
-						if (in_array($row['etablissement'], $etablissements)) {  
-							if ($row['etablissement'] != $current_iut) {
-								if ($current_iut!=""){
-									table_end();
-								}
-								echo '<h1 class="title">'.$row['etablissement'].'</h1></br>';
-								echo '</br><a href="/admin/admin_get_data.php?iut='.$row['etablissement'].'" class="button">CSV File</a></br>';
-								$current_iut = $row['etablissement'];
-								table_begin();
-								$count=0;
-							}
-							$count = $count+1;
-							table_row($count, $row);
-						}                       
+
+                        if ($row['etablissement'] != $current_iut) {
+                            if ($current_iut!=""){
+                                table_end();
+                            }
+                            echo '<h1 class="title">'.$row['etablissement'].'</h1></br>';
+                            echo '</br><a href="/admin/admin_get_data.php?iut='.$row['etablissement'].'" class="button">CSV File</a></br>';
+                            $current_iut = $row['etablissement'];
+                            table_begin();
+                            $count=0;
+                        }
+                        $count = $count+1;
+                        table_row($count, $row);
+                                                
                     } 
                     table_end()  ;
                     

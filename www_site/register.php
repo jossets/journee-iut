@@ -1,16 +1,49 @@
+<?php session_start(); ?>
+<?php require_once 'csrfguard.php'; ?>
 <?php 
 ////////////////////////////////////////////////////////////////////////////
 // Session Id is UID
 //
+$isRegistrationClosed=true; 
+
 if (isset($_GET['uid'])) {
     setcookie('uit_ctf_uid', $_GET['uid'], time() + (86400 * 30), "/"); // 86400 = 1 day
 }
 
+function isCaptchaOk()
+{
+	if (!isset($_POST["g-recaptcha-response"])) {
+		return false;
+	}
+
+	$url = 'https://www.google.com/recaptcha/api/siteverify';
+	$data = array(
+		'secret' => '6LdAw9EUAAAAAHvEKpe4OFgN493M48zvfO--NYWK',
+		'response' => $_POST["g-recaptcha-response"]
+	);
+	$options = array(
+		'http' => array (
+			'method' => 'POST',
+			'content' => http_build_query($data)
+		)
+	);
+	$context  = stream_context_create($options);
+	$verify = file_get_contents($url, false, $context);
+	$captcha_success=json_decode($verify);
+
+	if ($captcha_success->success==true) {
+		return true;
+	}
+	return false;	
+}
 
 ////////////////////////////////////////////////////////////////////////////
 // Register Form ?
 //
 if (isset($_POST['etablissement'])) {
+	
+	if (!$isRegistrationClosed) {
+	
     //
     // Create DB ???
     //
@@ -56,57 +89,62 @@ if (isset($_POST['etablissement'])) {
     //
     $db = new PDO('sqlite:conf/ctf_iut.sqlite');
     if ($db) {
-        $lycee = filter_var($_POST['lycee'], FILTER_SANITIZE_STRING);
-        $etablissement = filter_var($_POST['etablissement'], FILTER_SANITIZE_STRING);
-        $nom1 = filter_var($_POST['nom1'], FILTER_SANITIZE_STRING);
-        $prenom1 = filter_var($_POST['prenom1'], FILTER_SANITIZE_STRING);
-        $email1 = filter_var($_POST['email1'], FILTER_VALIDATE_EMAIL);
-        $uid1 =uniqid();
-        $nom2 = filter_var($_POST['nom2'], FILTER_SANITIZE_STRING);
-        $prenom2 = filter_var($_POST['prenom2'], FILTER_SANITIZE_STRING);
-        $email2 = filter_var($_POST['email2'], FILTER_VALIDATE_EMAIL);
-        $uid2 =uniqid();
-        $uid = uniqid();
-        $_SESSION["uid"] = $uid;
+		if (isCaptchaOk()) {
+			$lycee = filter_var($_POST['lycee'], FILTER_SANITIZE_STRING);
+			$etablissement = filter_var($_POST['etablissement'], FILTER_SANITIZE_STRING);
+			$nom1 = filter_var($_POST['nom1'], FILTER_SANITIZE_STRING);
+			$prenom1 = filter_var($_POST['prenom1'], FILTER_SANITIZE_STRING);
+			$email1 = filter_var($_POST['email1'], FILTER_VALIDATE_EMAIL);
+			$uid1 =uniqid();
+			$nom2 = filter_var($_POST['nom2'], FILTER_SANITIZE_STRING);
+			$prenom2 = filter_var($_POST['prenom2'], FILTER_SANITIZE_STRING);
+			$email2 = filter_var($_POST['email2'], FILTER_VALIDATE_EMAIL);
+			$uid2 =uniqid();
+			$uid = uniqid();
+			$_SESSION["uid"] = $uid;
 
-        setcookie('uit_ctf_uid', $uid, time() + (86400 * 30), "/"); // 86400 = 1 day
+			setcookie('uit_ctf_uid', $uid, time() + (86400 * 30), "/"); // 86400 = 1 day
 
-        $statement = $db->prepare('INSERT INTO participants (
-            lycee, etablissement, 
-            nom1, prenom1, email1, uid1, ismail1confirmed,
-            nom2, prenom2, email2, uid2, ismail2confirmed,  
-            uid, teamname, state)
-            VALUES (:lycee, :etablissement, 
-            :nom1, :prenom1, :email1, :uid1, false,
-            :nom2, :prenom2, :email2, :uid2, false,
-            :uid, "no_name_yet", 0)');
+			$statement = $db->prepare('INSERT INTO participants (
+				lycee, etablissement, 
+				nom1, prenom1, email1, uid1, ismail1confirmed,
+				nom2, prenom2, email2, uid2, ismail2confirmed,  
+				uid, teamname, state)
+				VALUES (:lycee, :etablissement, 
+				:nom1, :prenom1, :email1, :uid1, false,
+				:nom2, :prenom2, :email2, :uid2, false,
+				:uid, "no_name_yet", 0)');
 
-        $statement->execute([
-            'lycee' => $lycee,
-            'etablissement' => $etablissement,
-            'nom1' => $nom1,
-            'prenom1' => $prenom1,
-            'email1' => $email1,
-            'uid1' => $uid1,
-            'nom2' => $nom2,
-            'prenom2' => $prenom2,
-            'email2' => $email2,
-            'uid2' => $uid2,
-            'uid' => $uid,
-        ]);
+			$statement->execute([
+				'lycee' => $lycee,
+				'etablissement' => $etablissement,
+				'nom1' => $nom1,
+				'prenom1' => $prenom1,
+				'email1' => $email1,
+				'uid1' => $uid1,
+				'nom2' => $nom2,
+				'prenom2' => $prenom2,
+				'email2' => $email2,
+				'uid2' => $uid2,
+				'uid' => $uid,
+			]);
 
-        require_once('var_env.php');
-        if ($ctf_mail_enabled){
-            require_once('ctf_mail.php');
-            //echo "Register: Send mail to ".$email1;
-            ctf_send_registered_mail($uid, $uid1, $email1);  
-            ctf_send_registered_mail($uid, $uid2, $email2);  
-        } else {
-            //echo "Mail not enabled";
-        }
+			require_once('var_env.php');
+			if ($ctf_mail_enabled){
+				require_once('ctf_mail.php');
+				//echo "Register: Send mail to ".$email1;
+				ctf_send_registered_mail($uid, $uid1, $email1);  
+				ctf_send_registered_mail($uid, $uid2, $email2);  
+			} else {
+				//echo "Mail not enabled";
+			}
+		} else {
+			print("Captcha ko");
+		}
     } else {
         print("DB ko");
     }
+	}
 }
 
 ?>
@@ -115,7 +153,24 @@ if (isset($_POST['etablissement'])) {
 <html lang="fr">
 
 <head>
-    <title>IUT Réseaux & Télécom - CTF 2020</title>
+<?php
+//-- Fonction de récupération de l'adresse IP du visiteur
+    if ( isset ( $_SERVER['HTTP_X_FORWARDED_FOR'] ) )
+    {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    elseif ( isset ( $_SERVER['HTTP_CLIENT_IP'] ) )
+    {
+        $ip  = $_SERVER['HTTP_CLIENT_IP'];
+    }
+    else
+    {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    $ipe = base64_encode(base64_encode("Flag_" . $ip));
+?>
+<!-- double decode base64 -->
+    <title><?php echo "DAYCTF 2020-02-05 - DUT Réseaux & Télécom / Lycées - " . $ipe ?></title> 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -140,15 +195,69 @@ if (isset($_POST['etablissement'])) {
 ?>
 
 <body>
-    <?php require_once('header.php'); ?>
-    
-    <?php
 
+<body bgcolor='black'>
+<!--- <div class="container" onclick="window.location.href='/redirect.php';"> -->
+<div class="column auto">
+<figure onclick="window.location.href='/redirect.php';" width="50%" style="text-align:center">
+                    <img src="/img/dayctf_20200205.png">  </figure>
+</div>
 
+<?php
 ////////////////////////////////////////////////////////////////////////////
 // Validate a mail
 //
 
+
+function countAlreadyRegistered($etablissement){
+    $db = new PDO('sqlite:conf/ctf_iut.sqlite');
+    if ($db) {
+        $statement = $db->prepare('SELECT count(nom1) as count_nom from  participants where ismail1confirmed=true AND ismail2confirmed=true AND  etablissement=:etablissement;');
+        $statement->execute([
+            'etablissement' => $etablissement,
+        ]);
+        $row = $statement->fetch();
+        
+        if (isset($row['count_nom'])) {
+            return $row['count_nom'];
+        } else {
+            return 0;
+        }
+    }
+}
+
+
+
+function isOnWaitingList($uid) {
+    include('etablissements.php');
+    $db = new PDO('sqlite:conf/ctf_iut.sqlite');
+    if ($db) {
+        $iut="";
+
+        $statement = $db->prepare('SELECT etablissement FROM participants WHERE uid=:uid');
+        $statement->execute([
+            'uid' => $uid,
+        ]);
+        if ($row =  $statement->fetch()) {
+            $iut = trim($row['etablissement']);
+	} else {
+		return false;
+	}
+
+        $registeredcount = countAlreadyRegistered($iut);
+        $places = $etablissements_places[$iut];
+        $onwaiting = ($registeredcount>$places);
+        if ($registeredcount>$places) {
+            //setOnWaitingList($uid);
+            echo "Candidature $registeredcount sur $places places à [$iut]. Mise En liste d'attente.";
+            return true;
+        } else {
+            echo "Candidature $registeredcount sur $places places à $iut. Place ok.";
+            return false;
+        }
+
+    }
+}
 
 
 function getRandomTeamName() {
@@ -215,9 +324,17 @@ if (isset($_GET['uid']) && isset($_GET['uidm'])) {
             'uid' => $_GET['uid'] 
         ]);
         // Send mail with team name
-        require_once('ctf_mail.php');
-        ctf_send_team_validated_mail($uid  ,$uidm1 , $mail1, $teamname); 
-        ctf_send_team_validated_mail($uid  ,$uidm2 , $mail2, $teamname);
+	require_once('ctf_mail.php');
+
+
+        if (isOnWaitingList($id)) {
+            ctf_send_team_validated_mail_waitinglist($uid  ,$uidm1 , $mail1, $teamname);
+            ctf_send_team_validated_mail_waitinglist($uid  ,$uidm2 , $mail2, $teamname);
+        } else {
+            ctf_send_team_validated_mail($uid  ,$uidm1 , $mail1, $teamname);
+            ctf_send_team_validated_mail($uid  ,$uidm2 , $mail2, $teamname);
+        }
+
     }
 
     
@@ -242,6 +359,22 @@ function isFlagAlreadyValidated($uid, $validatedFlag){
     }
 }
 
+function getIP() {
+//-- Fonction de récupération de l'adresse IP du visiteur
+    if ( isset ( $_SERVER['HTTP_X_FORWARDED_FOR'] ) )
+    {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    elseif ( isset ( $_SERVER['HTTP_CLIENT_IP'] ) )
+    {
+        $ip  = $_SERVER['HTTP_CLIENT_IP'];
+    }
+    else
+    {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+	return $ip;
+}
 ///////////////////////////////////////////////////////////////////////////////////
 // Validate FLag
 //
@@ -260,6 +393,11 @@ if (isset($_POST['flag'])) {
                 $validatedFlag =  $flag;
             }
         }
+		$ip = getIP();
+		if ( $_POST['flag'] == "Flag_".$ip ) {
+			$isflagValif = true;
+            $validatedFlag =  "Flag_IP";
+		}
         if ($isflagValif) {
             // Déjà validé ?
             if (isFlagAlreadyValidated($uid, $validatedFlag)) {
@@ -321,14 +459,24 @@ if (isset($_POST['flag'])) {
         if ($fullValidated) {
         ?>
             <form action='' method="post">
-                <div class="container">
-                    <label class="label">Votre équipe est enregistrée, les deux mails sont validés.</label>
-                    </br>
-                    <label class="label">Pour marquer des points, cherchez les Flags sur le site et saisissez les ci-dessous.</br></br></label>
+		<div class="container">
+                    <label class="label"><font color="white">Votre équipe est enregistrée, les deux mails sont validés.</label>
+		    </br>
+
+
+
+<?php
+        if (isOnWaitingList($id)) {
+            echo "<label class='label'>Nous sommes désolés, mais toutes les places pour le CTF de cet établissement ont été attribuées.
+            Vous êtes sur la liste d'attente. Nous vous contacterons rapidement par mail pour vous informer de la suite donnée à votre candidature.</label>";
+            echo "</br>";
+        }
+?>
+                    <label class="label"><font color="white">Pour marquer des points, cherchez les Flags sur le site et saisissez les ci-dessous.</br></br></label>
                     <div class="field">
-                        <label class="label">Flag</label>
+                        <label class="label"><font color="white">Flag</label>
                         <div class="control has-icons-left">
-                            <input class="input" type="text" placeholder="nom" name="flag">
+                            <input class="input" type="text" placeholder="Flag_xxxxxxxxxxxxxx" name="flag" style="color:black;" >
                             <span class="icon is-small is-left">
                                 <i class="fas fa-user"></i>
                             </span>
@@ -336,7 +484,7 @@ if (isset($_POST['flag'])) {
                     </div>
                     <div class="field is-grouped">
                         <div class="control">
-                            <button class="button is-link">Submit</button>
+                            <button class="button is-link">Envoyer</button>
                         </div>
 
                     </div>
@@ -345,27 +493,46 @@ if (isset($_POST['flag'])) {
             </section>
             <a href='/flag.php' hidden=true>Test flag</a>
         <?php } else if ($partialValidated) { ?>
-            <div class="container">
-            <label class="label">Votre équipe est enregistrée. </br>Un premier mail est validé.</br>Merci de valider le second mail...</label>
+	    <div class="container">
+            <label class="label"><font color="white">Votre équipe est enregistrée. </br>Un premier mail est validé.</br>Merci de valider le second mail...</label>
             </br>
 
         </div>
             </section>
-        <?php } else { ?>
-            <div class="container">
-            <label class="label">Votre équipe est enregistrée. </br>Merci de valider les deux mails...</label>
+        <?php } else { 
+		
+		if ($isRegistrationClosed) { ?>
+	<div class="container">
+        <label class="label"><font color="white">Enregistrements terminés...</label>
+        </br>
+
+    </div>	
+	<?php } else { ?>
+	    <div class="container">
+            <label class="label"><font color="white">Votre équipe est enregistrée. </br>Merci de valider les deux mails...</label>
             </br>
 
         </div>
             </section>
-        <?php } ?>
-<?php } else { ?>
+        <?php } } ?>
+		
+
+		
+<?php } else { 
+	if ($isRegistrationClosed) { ?>
+	<div class="container">
+        <label class="label"><font color="white">Enregistrements terminés...</label>
+        </br>
+
+    </div>	
+	<?php } else { ?>
     <div class="container">
-        <label class="label">Merci de vous enregistrer avec le formulaire...</label>
+        <label class="label"><font color="white">Merci de vous enregistrer avec le formulaire...</label>
         </br>
 
     </div>
-<?php }  ?>
+	<?php }
+	}  ?>
 
 </body>
 
