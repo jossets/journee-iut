@@ -34,7 +34,7 @@
 
 
 
-## Instalaltion du serveur web
+## Installation du serveur web
 
 Définir un LOGIN PASSWDORD pour accéder aux info d'administration
 
